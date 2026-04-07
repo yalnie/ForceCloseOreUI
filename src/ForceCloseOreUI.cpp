@@ -198,7 +198,7 @@ std::string getConfigDir() {
     return fallback;
   return primary;
 #else
-  std::string primary = "/sdcard/games";
+  std::string primary = "/sdcard/Android/data/com.mojang.minecraftpe/files/mods";
   if (!primary.empty()) {
     primary += "/ForceCloseOreUI/";
     if (testDirWritable(primary))
