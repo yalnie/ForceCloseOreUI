@@ -2,11 +2,18 @@ name: Build
 
 on:
   push:
+    branches:
+      - master
+      - main
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build-android:
     runs-on: windows-latest
+    permissions:
+      contents: write
+      
     steps:
       - uses: actions/checkout@v4
 
@@ -19,10 +26,20 @@ jobs:
       - name: Build for Android (SO)
         run: |
           xmake f -p android -a arm64-v8a -m release -v -y
-          xmake
+          xmake -y
 
-      - name: Upload SO
+      - name: Upload SO to Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: android
+          name: android-arm64
           path: build/android/arm64-v8a/release/*.so
+
+      - name: Create Release and Upload SO
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Release Build ${{ github.run_number }}
+          files: build/android/arm64-v8a/release/*.so
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
